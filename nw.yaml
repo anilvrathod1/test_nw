@@ -1,0 +1,68 @@
+#Update Networker using ANSIBLE                                                            #
+##Version:1                                                                                 #
+##This play book help to update Networker                                                   #
+#############################################################################################
+##DO NOT MAKE ANY CHANGES, if somthing not working, kindly report anil.rathod@capgemini.com #
+##------------------------------------------------------------------------------------------#
+##Author: Anil Rathod                                                                       #
+##------------------------------------------------------------------------------------------+
+---
+- hosts : all
+  gather_facts: false
+  become: yes
+  tasks: 
+    - name: Adding Latest repo of Networker 
+      zypper_repository: 
+         repo: 'http://193.28.206.51/repo/Networker-latest'
+         name: Networker-latest
+         state: present 
+         runrefresh: yes
+      register: Networker_repo
+      become: yes
+#    - name: Checking the installed version of Networker..
+#      shell: rpm -qa | grep "{{ item }}"
+#      with_items:
+#        - lgtoclnt
+#      register : output
+
+#    - name: Status of installed version of Networker...
+#      debug: 
+#        var: output.results
+
+    - name: Start Installation of Networker.. 
+      zypper:
+        name: lgtoclnt 
+        state: latest
+      register: lgtoclnt_installed 
+      become: yes
+    - name : Start Installation of lgtonmda
+      zypper:
+        name: lgtonmda   
+        state: latest
+      register: lgtonmda_installed
+      become: yes
+    - name : Start Installation of NetWorker Manual Pages lgtoman
+      zypper:
+        name: lgtoman
+        state: latest
+      become: yes
+      register: lgtoman_installed
+    - name : Start Installation of lgtonmc
+      zypper: 
+        name: lgtonmc
+        state: present
+      become: yes
+      register: lgtonmc_installed
+    - name : Installation of lgtonmsap
+      zypper:
+        name : lgtonmsap
+        state: latest
+      become: yes
+      register: lgtonmsap_installed
+    - name: Start NetWorker Client
+      service:
+        name: networker
+        state: restarted
+      become: yes
+      register: networker.daemon
+      #when:  lgtoclnt_installed |succeeded
